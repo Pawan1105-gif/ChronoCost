@@ -170,7 +170,7 @@ function ProjectSubmission({ user }) {
   return (
     <Container className="py-12">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-gradient-end mb-8">Submit Project Details</h1>
+        <h1 className="text-3xl font-bold text-red-100 mb-8">Submit Project Details</h1>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="card">

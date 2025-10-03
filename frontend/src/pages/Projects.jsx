@@ -40,7 +40,7 @@ function Projects({ user }) {
       ) : (
         <Container className="py-12">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gradient-end">Your Projects</h1>
+            <h1 className="text-3xl font-bold text-red-100">Your Projects</h1>
             <Link to="/projects/new" className="btn btn-primary">
               New Project
             </Link>

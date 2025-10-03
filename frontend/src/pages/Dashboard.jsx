@@ -60,15 +60,15 @@ function Dashboard({ user }) {
   return (
     <Container className="py-12">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="card bg-blue-50 border border-blue-100">
+        <div className="card  border border-blue-100">
           <h3 className="text-lg font-medium text-blue-900">Total Projects</h3>
           <p className="mt-2 text-3xl font-bold text-blue-600">{stats.totalProjects}</p>
         </div>
-        <div className="card bg-yellow-50 border border-yellow-100">
+        <div className="card  border border-yellow-100">
           <h3 className="text-lg font-medium text-yellow-900">High Risk Projects</h3>
           <p className="mt-2 text-3xl font-bold text-yellow-600">{stats.highRiskProjects}</p>
         </div>
-        <div className="card bg-green-50 border border-green-100">
+        <div className="card  border border-green-100">
           <h3 className="text-lg font-medium text-green-900">Active Predictions</h3>
           <p className="mt-2 text-3xl font-bold text-green-600">{stats.recentProjects.length}</p>
         </div>
@@ -76,7 +76,7 @@ function Dashboard({ user }) {
 
       <div className="mt-12">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Recent Projects</h2>
+          <h2 className="text-3xl font-bold text-white">Recent Projects</h2>
           <Link to="/projects" className="btn btn-primary">View All Projects</Link>
         </div>
 

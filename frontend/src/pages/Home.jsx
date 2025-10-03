@@ -6,34 +6,35 @@ function Home() {
     <main>
       <div className="bg-custom-gradient">
         <Container>
-          <div className="py-20 relative">
-            <div className="text-center relative z-10">
-              <div className="w-24 h-24 mx-auto mb-8 bg-white rounded-full flex items-center justify-center">
-                <span className="text-4xl font-bold text-gradient-end">CC</span>
-              </div>
-              <h1 className="text-4xl font-bold text-white sm:text-6xl">
-                Smart Cost Prediction for Infrastructure Projects
-              </h1>
-              <p className="mt-6 text-lg text-gray-200 max-w-3xl mx-auto">
-                ChronoCost uses AI to predict project costs, timelines, and delay risks for infrastructure projects. Make data-driven decisions with our intelligent prediction system.
-              </p>
-              <div className="mt-10 flex justify-center gap-4">
-                <Link to="/signup" className="btn bg-white text-gradient-end hover:bg-gray-100 text-lg px-8 py-3">
-                  Try Free Demo
-                </Link>
-                <Link to="/login" className="btn border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-3">
-                  Sign In
-                </Link>
-              </div>
-              <div className="mt-16">
-                <div className="mx-auto rounded-lg shadow-2xl bg-white/10 p-8 max-w-3xl">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="h-32 bg-white/5 rounded-lg animate-pulse"></div>
-                    <div className="h-32 bg-white/5 rounded-lg animate-pulse"></div>
-                    <div className="h-32 bg-white/5 rounded-lg animate-pulse"></div>
-                    <div className="h-32 bg-white/5 rounded-lg animate-pulse"></div>
-                  </div>
+          <div className="py-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+              {/* Left: title, subtitle, description, CTAs */}
+              <div className="text-left">
+                <div className="text-6xl font-bold rounded-full ">
+                  ChronoCost :
                 </div>
+
+                <h1 className="text-4xl font-bold text-white sm:text-5xl">
+                  Smart Cost Prediction for Infrastructure Projects
+                </h1>
+                <h2 className="mt-4 text-xl text-gray-200">Predict costs, timelines & risks with AI</h2>
+
+                <p className="mt-6 text-lg text-gray-200 max-w-2xl">
+                  ChronoCost uses AI to predict project costs, timelines, and delay risks for infrastructure projects. Make data-driven decisions with our intelligent prediction system.
+                </p>
+
+                <div className="mt-8 flex gap-4">
+                  <Link to="/signup" className="btn bg-white text-gradient-end hover:bg-gray-100 text-xl px-8 py-3">
+                    Lets Start....
+                  </Link>
+                  
+                </div>
+              </div>
+
+              {/* Right: stacked images from public folder */}
+              <div className="space-y-6">
+                <img src="/home1.png" alt="Home 1" className="w-full rounded-lg shadow-lg object-cover h-48 sm:h-64 md:h-80" />
+                <img src="/home2.png" alt="Home 2" className="w-full rounded-lg shadow-lg object-cover object-top h-48 sm:h-64 md:h-80" />
               </div>
             </div>
           </div>
