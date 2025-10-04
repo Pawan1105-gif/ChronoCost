@@ -6,8 +6,14 @@ import { toast } from 'react-hot-toast'
 import Container from '../components/Container'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import ErrorBoundary from '../components/ErrorBoundary'
 
 const COLORS = ['#2563eb', '#16a34a', '#dc2626', '#f59e0b', '#6366f1', '#ec4899']
+
+const formatNumber = (num) => {
+  if (num === null || num === undefined) return '0'
+  return num.toLocaleString()
+}
 
 function ProjectDetail({ user }) {
   const { id } = useParams()
@@ -24,8 +30,13 @@ function ProjectDetail({ user }) {
   })
 
   useEffect(() => {
+    if (!user) {
+      toast.error('Please log in to view project details')
+      navigate('/login')
+      return
+    }
     fetchProjectData()
-  }, [id])
+  }, [id, user])
 
   const fetchProjectData = async () => {
     try {
@@ -35,14 +46,27 @@ function ProjectDetail({ user }) {
         import.meta.env.VITE_APPWRITE_PROJECTS_COLLECTION,
         id
       )
+
+      // Check if user has access to this project
+      if (projectResponse.userId !== user.$id) {
+        toast.error('You do not have permission to view this project')
+        navigate('/projects')
+        return
+      }
+      
       setProject(projectResponse)
 
       // Get project predictions
       const predictionsResponse = await database.listDocuments(
         import.meta.env.VITE_APPWRITE_DATABASE_ID,
         import.meta.env.VITE_APPWRITE_PREDICTIONS_COLLECTION,
-        [Query.equal('projectId', id)]
-      )
+        [Query.equal('projectId', [id])]
+      ).catch(predictionError => {
+        console.error('Failed to fetch predictions:', predictionError)
+        // Continue without predictions if unauthorized
+        return { documents: [] }
+      })
+
       setPredictions(predictionsResponse.documents)
       
       if (predictionsResponse.documents.length > 0) {
@@ -51,14 +75,22 @@ function ProjectDetail({ user }) {
 
       // Initialize what-if parameters
       setWhatIfParams({
-        materialCost: projectResponse.materialCost,
-        laborCost: projectResponse.laborCost,
-        vendorReliability: projectResponse.vendorReliability
+        materialCost: projectResponse.materialCost || 0,
+        laborCost: projectResponse.laborCost || 0,
+        vendorReliability: projectResponse.vendorReliability || 5
       })
     } catch (error) {
       console.error('Failed to fetch project data:', error)
-      toast.error('Failed to load project data')
-      navigate('/projects')
+      if (error.code === 401) {
+        toast.error('Please log in to view project details')
+        navigate('/login')
+      } else if (error.code === 403) {
+        toast.error('You do not have permission to view this project')
+        navigate('/projects')
+      } else {
+        toast.error('Failed to load project data')
+        navigate('/projects')
+      }
     } finally {
       setLoading(false)
     }
@@ -128,13 +160,26 @@ function ProjectDetail({ user }) {
 
   if (loading) {
     return (
-      <Container className="py-12">
+      <Container className="min-h-screen flex items-center justify-center">
         <LoadingSpinner />
       </Container>
     )
   }
 
-  const factorBreakdownData = currentPrediction ? 
+  if (!project) {
+    return (
+      <Container className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Project not found</h2>
+          <button onClick={() => navigate('/projects')} className="btn btn-primary">
+            Return to Projects
+          </button>
+        </div>
+      </Container>
+    )
+  }
+
+  const factorBreakdownData = currentPrediction?.factorBreakdown ? 
     Object.entries(JSON.parse(currentPrediction.factorBreakdown))
       .map(([name, value]) => ({
         name: name.charAt(0).toUpperCase() + name.slice(1).replace(/([A-Z])/g, ' $1'),
@@ -151,7 +196,8 @@ function ProjectDetail({ user }) {
     }))
 
   return (
-    <Container className="py-12">
+    <ErrorBoundary>
+      <Container className="py-12">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">{project.projectName}</h1>
         <p className="mt-2 text-gray-600">
@@ -164,10 +210,10 @@ function ProjectDetail({ user }) {
           <div className="card">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Project Details</h2>
             <div className="space-y-2 text-gray-600">
-              <p>Material Cost: ${project.materialCost.toLocaleString()}</p>
-              <p>Labor Cost: ${project.laborCost.toLocaleString()}</p>
-              <p>Vendor Reliability: {project.vendorReliability}/10</p>
-              <p>Historical Delays: {project.historicalDelays}</p>
+              <p>Material Cost: ${formatNumber(project.materialCost)}</p>
+              <p>Labor Cost: ${formatNumber(project.laborCost)}</p>
+              <p>Vendor Reliability: {project.vendorReliability || 0}/10</p>
+              <p>Historical Delays: {project.historicalDelays || 0}</p>
             </div>
             <div className="mt-6 space-x-4">
               <button 
@@ -258,19 +304,19 @@ function ProjectDetail({ user }) {
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-700 font-medium">Predicted Cost</p>
                   <p className="text-2xl font-bold text-blue-900">
-                    ${Math.round(currentPrediction.predictedCost).toLocaleString()}
+                    ${formatNumber(Math.round(currentPrediction?.predictedCost || 0))}
                   </p>
                 </div>
                 <div className="text-center p-4 bg-green-50 rounded-lg">
                   <p className="text-sm text-green-700 font-medium">Timeline (Days)</p>
                   <p className="text-2xl font-bold text-green-900">
-                    {currentPrediction.predictedTimeline}
+                    {currentPrediction?.predictedTimeline || 0}
                   </p>
                 </div>
                 <div className="text-center p-4 bg-red-50 rounded-lg">
                   <p className="text-sm text-red-700 font-medium">Risk Level</p>
                   <p className="text-2xl font-bold text-red-900">
-                    {(currentPrediction.riskProbability * 100).toFixed(1)}%
+                    {((currentPrediction?.riskProbability || 0) * 100).toFixed(1)}%
                   </p>
                 </div>
               </div>
@@ -322,6 +368,7 @@ function ProjectDetail({ user }) {
         )}
       </div>
     </Container>
+    </ErrorBoundary>
   )
 }
 
